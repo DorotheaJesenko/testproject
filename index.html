@@ -1,1 +1,186 @@
-<h1>hello</h1>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <!-- This line makes the page fit properly on a phone screen -->
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Cutest Bird Vote</title>
+
+  <style>
+    /* ---------- Looks (CSS) ---------- */
+    body {
+      font-family: system-ui, sans-serif;
+      background: #f4f7fb;
+      color: #222;
+      margin: 0;
+      padding: 24px 16px 48px;
+      text-align: center;
+    }
+
+    h1 {
+      font-size: 1.8rem;
+      margin-bottom: 4px;
+    }
+
+    .subtitle {
+      color: #666;
+      margin-top: 0;
+      margin-bottom: 24px;
+    }
+
+    /* The grid holding the four cards: 1 column on phones, 2 on wider screens */
+    #birds {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 16px;
+      max-width: 600px;
+      margin: 0 auto 24px;
+    }
+
+    @media (min-width: 520px) {
+      #birds {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    .card {
+      background: white;
+      border-radius: 16px;
+      padding: 20px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    }
+
+    .emoji {
+      font-size: 4rem;
+      line-height: 1;
+    }
+
+    .name {
+      font-size: 1.3rem;
+      font-weight: bold;
+      margin: 8px 0;
+    }
+
+    .count {
+      font-size: 1.1rem;
+      color: #555;
+      margin-bottom: 12px;
+    }
+
+    button {
+      font-size: 1rem;
+      padding: 12px 24px;
+      border: none;
+      border-radius: 10px;
+      cursor: pointer;
+    }
+
+    .vote-btn {
+      background: #3b82f6;
+      color: white;
+      width: 100%;
+    }
+
+    .vote-btn:hover {
+      background: #2563eb;
+    }
+
+    #reset {
+      background: #e5e7eb;
+      color: #333;
+    }
+
+    #reset:hover {
+      background: #d1d5db;
+    }
+  </style>
+</head>
+
+<body>
+  <!-- ---------- What appears on the page (HTML) ---------- -->
+  <h1>Which bird is the cutest? 🐦</h1>
+  <p class="subtitle">Tap Vote on your favourite!</p>
+
+  <!-- The bird cards get added here by the code below -->
+  <div id="birds"></div>
+
+  <button id="reset">Reset votes</button>
+
+  <script>
+    // ---------- What the page does (JavaScript) ----------
+
+    // The list of birds. To add another bird later, add another line here.
+    const birds = [
+      { id: "owl",     name: "Owl",     emoji: "🦉" },
+      { id: "duck",    name: "Duck",    emoji: "🦆" },
+      { id: "penguin", name: "Penguin", emoji: "🐧" },
+      { id: "parrot",  name: "Parrot",  emoji: "🦜" }
+    ];
+
+    // The name of the "drawer" in the browser where we save the votes
+    const STORAGE_KEY = "birdVotes";
+
+    // Get saved votes from the browser (or start empty if there are none)
+    function loadVotes() {
+      try {
+        const saved = localStorage.getItem(STORAGE_KEY);
+        return saved ? JSON.parse(saved) : {};
+      } catch (error) {
+        return {};
+      }
+    }
+
+    // Save the votes into the browser
+    function saveVotes() {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(votes));
+      } catch (error) {
+        // If saving isn't allowed, the page still works, it just won't remember
+      }
+    }
+
+    let votes = loadVotes();
+
+    // Draw all the bird cards on the page
+    function showBirds() {
+      const container = document.getElementById("birds");
+      container.innerHTML = "";
+
+      birds.forEach(function (bird) {
+        const count = votes[bird.id] || 0;
+
+        const card = document.createElement("div");
+        card.className = "card";
+        card.innerHTML =
+          '<div class="emoji">' + bird.emoji + '</div>' +
+          '<div class="name">' + bird.name + '</div>' +
+          '<div class="count">Votes: ' + count + '</div>' +
+          '<button class="vote-btn" data-id="' + bird.id + '">Vote</button>';
+
+        container.appendChild(card);
+      });
+    }
+
+    // When any Vote button is clicked, add one vote for that bird
+    document.getElementById("birds").addEventListener("click", function (event) {
+      const id = event.target.getAttribute("data-id");
+      if (!id) return; // the click wasn't on a Vote button
+
+      votes[id] = (votes[id] || 0) + 1;
+      saveVotes();
+      showBirds();
+    });
+
+    // When "Reset votes" is clicked, set everything back to zero
+    document.getElementById("reset").addEventListener("click", function () {
+      votes = {};
+      saveVotes();
+      showBirds();
+    });
+
+    // Show the cards when the page first loads
+    showBirds();
+  </script>
+</body>
+</html>
+
